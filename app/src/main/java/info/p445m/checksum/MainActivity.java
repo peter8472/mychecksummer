@@ -18,7 +18,10 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 
 import javax.crypto.CipherInputStream;
+
+import java.io.IOException;
 import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 
 //import javax.lang.model.util.ElementScanner;
 
@@ -42,75 +45,75 @@ public class MainActivity extends AppCompatActivity {
             }
         });
         Button getfile = findViewById(R.id.files_button);
-    getfile.setOnClickListener(new View.OnClickListener() {
-        @Override
-        public void onClick(View view) {
-            Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
-            intent.addCategory(Intent.CATEGORY_OPENABLE);
-            intent.setType("*/*");
+        getfile.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+                intent.addCategory(Intent.CATEGORY_OPENABLE);
+                intent.setType("*/*");
 
-            // Optionally, specify a URI for the file that should appear in the
-            // system file picker when it loads.
-            // intent.putExtra(DocumentsContract.EXTRA_INITIAL_URI, pickerInitialUri);
+                // Optionally, specify a URI for the file that should appear in the
+                // system file picker when it loads.
+                // intent.putExtra(DocumentsContract.EXTRA_INITIAL_URI, pickerInitialUri);
 
-            startActivityForResult(intent, PICK_FILE);
-        }
-    });
+                startActivityForResult(intent, PICK_FILE);
+            }
+        });
 
-    Button lister = findViewById(R.id.lister_button);
-    lister.setOnClickListener(new View.OnClickListener() {
-        @Override
-        public void onClick(View view) {
-            File mydior = new File("/sorage/emulated/legacy/"); //getExternalFilesDir(null);
-            mydior = new File("/mnt/shell/emulated/0/");
-            mydior = new File("/storage/emulated/legacy/");
-            String []files = mydior.list();
-            if (files == null ) {
-                Log.e(TAG, " filexs is null");
+        Button lister = findViewById(R.id.lister_button);
+        lister.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Log.e(TAG, "onClick: " );
+                File mydior = new File("/sorage/emulated/legacy/"); //getExternalFilesDir(null);
+                mydior = new File("/mnt/shell/emulated/0/");
+                mydior = new File("/storage/sdcard0/Download");
+                String[] files = mydior.list();
+                if (files == null) {
+                    Log.e(TAG, " filexs is null");
 
-            } else if (files.length ==0 ) {
-                Log.e(TAG, "no external files");
-                Log.e(TAG, mydior.getAbsolutePath());
-                mydior = getFilesDir();
-                files = mydior.list();
-                if(files.length ==0 ) {
-                    Log.e(TAG, "no files");
+                } else if (files.length == 0) {
+                    Log.e(TAG, "no external files");
                     Log.e(TAG, mydior.getAbsolutePath());
-            
+                    mydior = getFilesDir();
+                    files = mydior.list();
+                    if (files.length == 0) {
+                        Log.e(TAG, "no files");
+                        Log.e(TAG, mydior.getAbsolutePath());
+                    }
+                } else {
+                    for (String string : files) {
+
+
+                        Log.e(TAG, string);
+                        try {
+                            File f = new File(mydior,string);
+                            byte ray[] = new byte[1555];
+                            int i;
+                            FileInputStream inStream = new FileInputStream(f);
+                            MessageDigest myd = MessageDigest.getInstance("SHA-256");
+
+                            while (( i = inStream.read(ray)) > 0) {
+                                myd.update(ray, 0, i);
+                            }
+                            java.io.StringWriter writer = new java.io.StringWriter();
+                            byte[] digest = myd.digest();
+                            for (byte b : digest) {
+                                writer.write(String.format("%02x", b));
+                            }
+                            Log.e(TAG, String.format(
+                                    "result %s", writer.toString()
+                            ));
+                        } catch (IOException | NoSuchAlgorithmException f) {
+                            Log.e(TAG, String.format("io exception: %s",  f.getMessage()));
+
+
+                        }
+                        Log.e(TAG, "workin");
+                    }
                 }
-            } else {
-                for (String string : files) {
-                    Log.e(TAG, string);
-                    try {
-                        File f = new File(string);
-                        FileInputStream inStream = new FileInputStream(f);
-                        MessageDigest md = MessageDigest.getInstance("SHA-256");
-
-                        while ((i = inStream.read(ray)) > 0 ) {
-                            myd.update(ray,0,i);
-                            
-                        }
-   
-
-                        java.io.StringWriter writer = new java.io.StringWriter();
-                    
-                        byte [] digest = myd.digest();
-                        for (byte b : digest) {
-                            writer.write(String.format("%02x",b));
-
-                        } 
-
-                        } catch (IOException f) {
-                            Log.e(TAG, "io exception");
-
-                                        
-                                    
-                        }
-            Log.e(TAG, "workin");
-            
-        }
-    });
-
+            }
+        });
     }
 
     @Override
